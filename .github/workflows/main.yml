@@ -38,5 +38,5 @@ jobs:
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
     - run: |
-        docker build . -f ./azure-vote/Dockerfile -t ${{ secrets.ACR_SERVER }}/azure-vote-front:${{ github.GITHUB_RUN_ID }}
-        docker push ${{ secrets.ACR_SERVER }}/azure-vote-front:${{ github.GITHUB_RUN_ID }}
+        docker build . -f ./azure-vote/Dockerfile -t aa01registry.azurecr.io/azure-vote-front:${{ github.GITHUB_RUN_ID }}
+        docker push aa01registry.azurecr.io/azure-vote-front:${{ github.GITHUB_RUN_ID }}
