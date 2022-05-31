@@ -59,9 +59,19 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
       
     # Builds and pushes an image up to your Azure Container Registry
-    - name: Build and push image to ACR
-      run: |
-        az acr build --image ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:${{ github.sha }} --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.AZURE_CONTAINER_REGISTRY_RESOURCE_GROUP }} -f ./azure-vote/Dockerfile . 
+    # - name: Build and push image to ACR
+    #   run: |
+    #     az acr build --image ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:${{ github.sha }} --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.AZURE_CONTAINER_REGISTRY_RESOURCE_GROUP }} -f ./azure-vote/Dockerfile . 
+
+    - name: Azure Container Registry Login
+      uses: Azure/docker-login@v1
+      with:
+        login-server: ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+    - run: |
+        docker build . -f ./azure-vote/Dockerfile -t ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/azure-vote-front:${{ github.sha }}
+        docker push ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/azure-vote-front:${{ github.sha }}
 
   createSecret:
     permissions:
