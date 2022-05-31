@@ -36,7 +36,8 @@ on:
 env:
   AZURE_CONTAINER_REGISTRY: "aa01registry"
   CONTAINER_NAME: "azure-vote-front"
-  RESOURCE_GROUP: "aks-aa-poc_group"
+  CLUSTER_RESOURCE_GROUP: "aks-aa-poc_group"
+  AZURE_CONTAINER_REGISTRY_RESOURCE_GROUP: "registry"
   CLUSTER_NAME: "aks-aa-poc"
   IMAGE_PULL_SECRET_NAME: "azure-vote-front-secret"
   DEPLOYMENT_MANIFEST_PATH: './azure-vote-all-in-one-redis.yaml'
@@ -60,7 +61,7 @@ jobs:
     # Builds and pushes an image up to your Azure Container Registry
     - name: Build and push image to ACR
       run: |
-        az acr build --image ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:${{ github.sha }} --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RESOURCE_GROUP }} .
+        az acr build --image ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:${{ github.sha }} --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.AZURE_CONTAINER_REGISTRY_RESOURCE_GROUP }} .
 
   createSecret:
     permissions:
@@ -78,15 +79,15 @@ jobs:
     - name: Get K8s context
       uses: azure/aks-set-context@v2.0
       with:
-        resource-group: ${{ env.RESOURCE_GROUP }}
+        resource-group: ${{ env.CLUSTER_RESOURCE_GROUP }}
         cluster-name: ${{ env.CLUSTER_NAME }}
 
     # Retrieves the credentials for pulling images from your Azure Container Registry
     - name: Get ACR credentials
       run: |
-        az acr update -n ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RESOURCE_GROUP }} --admin-enabled true
-        ACR_USERNAME=$(az acr credential show -g ${{ env.RESOURCE_GROUP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query username -o tsv)
-        ACR_PASSWORD=$(az acr credential show -g ${{ env.RESOURCE_GROUP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query passwords[0].value -o tsv)
+        az acr update -n ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.AZURE_CONTAINER_REGISTRY_RESOURCE_GROUP }} --admin-enabled true
+        ACR_USERNAME=$(az acr credential show -g ${{ env.AZURE_CONTAINER_REGISTRY_RESOURCE_GROUP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query username -o tsv)
+        ACR_PASSWORD=$(az acr credential show -g ${{ env.AZURE_CONTAINER_REGISTRY_RESOURCE_GROUP }} -n ${{ env.AZURE_CONTAINER_REGISTRY }} --query passwords[0].value -o tsv)
         echo "::add-mask::${ACR_USERNAME}"
         echo "::set-output name=username::${ACR_USERNAME}"
         echo "::add-mask::${ACR_PASSWORD}"
@@ -123,7 +124,7 @@ jobs:
     - name: Get K8s context
       uses: azure/aks-set-context@v2.0
       with:
-        resource-group: ${{ env.RESOURCE_GROUP }}
+        resource-group: ${{ env.CLUSTER_RESOURCE_GROUP }}
         cluster-name: ${{ env.CLUSTER_NAME }}
 
     # Deploys application based on given manifest file
