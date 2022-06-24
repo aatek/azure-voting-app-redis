@@ -3,6 +3,9 @@ services:
   azure-vote-back:
     image: mcr.microsoft.com/oss/bitnami/redis:6.0.8
     container_name: azure-vote-back
+    volumes:
+      - redis-data:/data
+      - redis-conf:/usr/local/etc/redis/redis.conf
     environment:
       ALLOW_EMPTY_PASSWORD: "yes"
     ports:
@@ -16,3 +19,6 @@ services:
       REDIS: azure-vote-back
     ports:
         - "8080:80"
+volumes:
+  redis-data:
+  redis-conf:
