@@ -21,8 +21,13 @@ spec:
         - name: ALLOW_EMPTY_PASSWORD
           value: "yes"
         ports:
-        - containerPort: 6379
-          name: redis
+        - containerPort: 6379  
+        resources:
+          requests:
+            cpu: 250m
+          limits:
+            cpu: 500m
+            memory: 128Mi
 ---
 apiVersion: v1
 kind: Service
